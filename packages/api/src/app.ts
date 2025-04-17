@@ -3,8 +3,10 @@ import cors from "cors";
 import express, { type Application, type Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
+import { env } from "@/config/env";
+import { NotFoundError } from "@/errors";
+import { errorHandler } from "@/middlewares/errorHandler.middleware";
 import morganMiddleware from "@/middlewares/morgan.middleware";
-import { env } from "./config/env";
 
 const app: Application = express();
 
@@ -18,5 +20,11 @@ app
       ok: true,
     });
   });
+
+app
+  .all("*splat", () => {
+    throw new NotFoundError();
+  })
+  .use(errorHandler);
 
 export default app;

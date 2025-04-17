@@ -4,11 +4,12 @@ import express, { type Application, type Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
 import morganMiddleware from "@/middlewares/morgan.middleware";
+import { env } from "./config/env";
 
 const app: Application = express();
 
 app
-  .use(cors({ origin: "http://localhost:3001", credentials: true }))
+  .use(cors({ origin: env.CLIENT_URL, credentials: true }))
   .use(morganMiddleware)
   .use(cookieParser())
   .use(express.json())

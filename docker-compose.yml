@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:17
+    container_name: auth_postgres
+    env_file:
+      - ./packages/api/.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis/redis-stack-server:7.2.0-v6
+    container_name: auth_redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+
+volumes:
+  pgdata:
+  redis_data:

@@ -11,13 +11,19 @@
     "lint:fix": "biome lint --write .",
     "format": "biome format .",
     "format:fix": "biome format --write .",
-    "clean": "pnpm -r clean && rm -rf node_modules"
+    "clean": "pnpm -r clean && rm -rf node_modules",
+    "prepare": "husky"
   },
   "author": "Ayush",
   "license": "ISC",
   "packageManager": "pnpm@10.5.2",
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.1",
     "typescript": "^5.8.3"
+  },
+  "lint-staged": {
+    "**/*.{js,ts,tsx,jsx}": ["biome check --write"]
   }
 }

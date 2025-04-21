@@ -13,4 +13,5 @@ export default defineConfig({
     password: process.env.POSTGRES_PASSWORD as string,
     ssl: false,
   },
+  casing: "snake_case",
 });

@@ -13,7 +13,13 @@ const envSchema = z.object({
   POSTGRES_DB: z.string(),
   REDIS_HOST: z.string(),
   REDIS_PORT: z.coerce.number().default(6379),
+  REDIS_URL: z.string(),
   CLIENT_URL: z.string(),
+  EMAIL_USERNAME: z.string(),
+  EMAIL_PASSWORD: z.string(),
+  EMAIL_PORT: z.coerce.number().default(2525),
+  EMAIL_HOST: z.string(),
+  EMAIL_FROM: z.string(),
 });
 
 const envVars = envSchema.safeParse(process.env);

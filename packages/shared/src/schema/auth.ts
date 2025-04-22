@@ -28,4 +28,15 @@ export const signupSchema = z.object({
   }),
 });
 
+export const verifyEmailSchema = z.object({
+  body: z.object({
+    verificationCode: z
+      .string({
+        required_error: "verification code is required",
+      })
+      .trim(),
+  }),
+});
+
 export type SignupInput = z.infer<typeof signupSchema>["body"];
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>["body"];

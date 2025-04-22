@@ -12,3 +12,12 @@ export const getUserByEmail = async (email: string) => {
   const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email));
   return user ?? null;
 };
+
+export const verifyUser = async (userId: string) => {
+  const [user] = await db
+    .update(usersTable)
+    .set({ isVerified: true })
+    .where(eq(usersTable.id, userId))
+    .returning();
+  return user ?? null;
+};

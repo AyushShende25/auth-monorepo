@@ -1,10 +1,15 @@
-import { BadRequestError, ServiceUnavailableError } from "@/errors";
+import { BadRequestError, ServiceUnavailableError, UnAuthorizedError } from "@/errors";
 import { addEmailToQueue } from "@/jobs/email/email.queue";
 import { createUser, getUserByEmail, verifyUser } from "@/modules/auth/auth.dal";
-import { generateVerificationCode, hashPassword } from "@/modules/auth/auth.utils";
+import {
+  comparePassword,
+  generateTokens,
+  generateVerificationCode,
+  hashPassword,
+} from "@/modules/auth/auth.utils";
 import * as verificationCodeStorage from "@/redis/verificationCodeStorage";
 import Logger from "@/utils/logger";
-import type { SignupInput, VerifyEmailInput } from "@auth-monorepo/shared/schema/auth";
+import type { LoginInput, SignupInput, VerifyEmailInput } from "@auth-monorepo/shared/schema/auth";
 
 export const signupService = async (signupInput: SignupInput) => {
   // Check if user already exists
@@ -44,8 +49,8 @@ export const signupService = async (signupInput: SignupInput) => {
 export const verifyEmailService = async (verifyEmailInput: VerifyEmailInput) => {
   // Get verification code
   const { verificationCode } = verifyEmailInput;
-  // verify the code with the stored code
 
+  // verify the code with the stored code
   const userId = await verificationCodeStorage.getVerificationCode(verificationCode);
 
   if (!userId) {
@@ -68,4 +73,21 @@ export const verifyEmailService = async (verifyEmailInput: VerifyEmailInput) => 
       Logger.error("could not send welcome email", error);
     }
   }
+};
+
+export const loginService = async (loginInput: LoginInput) => {
+  // check if user exists and is verified
+  const existingUser = await getUserByEmail(loginInput.email);
+  if (!existingUser || !existingUser.isVerified) {
+    throw new BadRequestError("Invalid Credentials or user is not verified");
+  }
+  // verify password
+  const isPasswordValid = await comparePassword(loginInput.password, existingUser.password);
+  if (!isPasswordValid) {
+    throw new UnAuthorizedError("Invalid credentials");
+  }
+  // generate access and refresh tokens
+  const { password, ...safeUser } = existingUser;
+  const { access_token, refresh_token } = await generateTokens(safeUser);
+  return { access_token, refresh_token, user: safeUser };
 };

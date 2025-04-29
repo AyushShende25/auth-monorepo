@@ -1,8 +1,9 @@
 import type { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-import { signupService, verifyEmailService } from "@/modules/auth/auth.service";
-import type { SignupInput, VerifyEmailInput } from "@auth-monorepo/shared/schema/auth";
+import { loginService, signupService, verifyEmailService } from "@/modules/auth/auth.service";
+import { cookieOptions } from "@/modules/auth/auth.utils";
+import type { LoginInput, SignupInput, VerifyEmailInput } from "@auth-monorepo/shared/schema/auth";
 
 export const signupHandler = async (req: Request<{}, {}, SignupInput>, res: Response) => {
   await signupService(req.body);
@@ -18,4 +19,19 @@ export const verifyEmailHandler = async (req: Request<{}, {}, VerifyEmailInput>,
     success: true,
     message: "Email successfully verified. You can now log in.",
   });
+};
+
+export const loginHandler = async (req: Request<{}, {}, LoginInput>, res: Response) => {
+  const { access_token, refresh_token } = await loginService(req.body);
+
+  res.cookie("access_token", access_token, {
+    ...cookieOptions,
+    expires: new Date(Date.now() + 1000 * 60 * 1),
+  });
+  res.cookie("refresh_token", refresh_token, {
+    ...cookieOptions,
+    expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+  });
+
+  res.status(200).json({ success: true, message: "User login success" });
 };

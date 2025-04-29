@@ -20,6 +20,9 @@ const envSchema = z.object({
   EMAIL_PORT: z.coerce.number().default(2525),
   EMAIL_HOST: z.string(),
   EMAIL_FROM: z.string(),
+  JWT_SECRET: z.string(),
+  JWT_ACCESS_TOKEN_TTL: z.coerce.number(),
+  JWT_REFRESH_TOKEN_TTL: z.coerce.number(),
 });
 
 const envVars = envSchema.safeParse(process.env);

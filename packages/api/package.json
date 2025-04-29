@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch --watch-preserve-output src/index.ts",
+    "dev:worker": "tsx watch --watch-preserve-output src/jobs/worker.ts",
     "start": "node dist/index.js",
     "clean": "rm -rf dist",
     "db:push": "drizzle-kit push"

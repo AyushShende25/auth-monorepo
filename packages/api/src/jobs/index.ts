@@ -1,1 +1,1 @@
-export * from "@/jobs/email/email.worker";
+export * from "@/jobs/email/email.queue";

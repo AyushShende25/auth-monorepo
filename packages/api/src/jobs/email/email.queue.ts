@@ -1,15 +1,8 @@
 import { Queue } from "bullmq";
 
 import { defaultQueueOptions, redisConnection } from "@/config/queue";
+import type { EmailJobData, EmailJobType } from "@/jobs/email/email.types";
 import Logger from "@/utils/logger";
-
-type EmailJobType = "verification" | "welcome";
-
-export type EmailJobData = {
-  email: string;
-  firstname: string;
-  emailVerificationCode?: string;
-};
 
 export const emailQueueName = "emailQueue";
 

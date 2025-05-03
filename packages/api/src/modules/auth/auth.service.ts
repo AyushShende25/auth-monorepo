@@ -1,12 +1,13 @@
 import { BadRequestError, ServiceUnavailableError, UnAuthorizedError } from "@/errors";
 import { addEmailToQueue } from "@/jobs/email/email.queue";
-import { createUser, getUserByEmail, verifyUser } from "@/modules/auth/auth.dal";
+import { createUser, verifyUser } from "@/modules/auth/auth.dal";
 import {
   comparePassword,
   generateTokens,
   generateVerificationCode,
   hashPassword,
 } from "@/modules/auth/auth.utils";
+import { getUserByEmail } from "@/modules/users/users.dal";
 import * as verificationCodeStorage from "@/redis/verificationCodeStorage";
 import Logger from "@/utils/logger";
 import type { LoginInput, SignupInput, VerifyEmailInput } from "@auth-monorepo/shared/schema/auth";

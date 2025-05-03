@@ -8,6 +8,7 @@ import { NotFoundError } from "@/errors";
 import { errorHandler } from "@/middlewares/errorHandler.middleware";
 import morganMiddleware from "@/middlewares/morgan.middleware";
 import authRouter from "@/modules/auth/auth.router";
+import userRouter from "@/modules/users/users.router";
 import "@/jobs";
 
 const app: Application = express();
@@ -24,6 +25,7 @@ app
   });
 
 app.use("/api/auth", authRouter);
+app.use("/api/users", userRouter);
 
 app
   .all("*splat", () => {

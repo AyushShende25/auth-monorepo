@@ -13,3 +13,6 @@ export const getWelcomeTemplate = (firstname: string) => `
     <p style="text-align: center;">We're thrilled to have you on board.</p>
   </div>
 `;
+
+export const getResetTemplate = (resetLink: string) =>
+  `<p>Click <a href="${resetLink}">here</a> to reset your password. Link expires in 10 minutes.</p>`;

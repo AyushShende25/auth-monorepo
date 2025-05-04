@@ -7,7 +7,7 @@ import Logger from "@/utils/logger";
 export const processEmailJob = async (job: Job<EmailJobData>) => {
   Logger.info(`Processing ${job.name} email job`, { jobId: job.id });
 
-  const { email, firstname, emailVerificationCode } = job.data;
+  const { email, firstname, emailVerificationCode, resetLink } = job.data;
 
   const emailService = new Email({ firstname, to: email });
 
@@ -16,6 +16,8 @@ export const processEmailJob = async (job: Job<EmailJobData>) => {
       await emailService.sendVerificationCode(emailVerificationCode as string);
     } else if (job.name === "welcome") {
       await emailService.sendWelcome();
+    } else if (job.name === "reset") {
+      await emailService.sendResetToken(resetLink as string);
     } else {
       throw new Error(`Unknown job type: ${job.name}`);
     }

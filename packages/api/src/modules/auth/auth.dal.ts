@@ -16,3 +16,15 @@ export const verifyUser = async (userId: string) => {
     .returning();
   return user ?? null;
 };
+
+export const updatePassword = async ({
+  newPassword,
+  userId,
+}: { newPassword: string; userId: string }) => {
+  const [user] = await db
+    .update(usersTable)
+    .set({ password: newPassword })
+    .where(eq(usersTable.id, userId))
+    .returning();
+  return user ?? null;
+};

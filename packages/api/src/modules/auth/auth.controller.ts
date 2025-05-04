@@ -2,14 +2,22 @@ import type { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
 import {
+  forgotPasswordService,
   loginService,
   logoutService,
   refreshTokensService,
+  resetPasswordService,
   signupService,
   verifyEmailService,
 } from "@/modules/auth/auth.service";
 import { cookieOptions } from "@/modules/auth/auth.utils";
-import type { LoginInput, SignupInput, VerifyEmailInput } from "@auth-monorepo/shared/schema/auth";
+import type {
+  ForgotPasswordInput,
+  LoginInput,
+  ResetPasswordInput,
+  SignupInput,
+  VerifyEmailInput,
+} from "@auth-monorepo/shared/schema/auth";
 
 export const signupHandler = async (req: Request<{}, {}, SignupInput>, res: Response) => {
   await signupService(req.body);
@@ -67,4 +75,22 @@ export const logoutHandler = async (req: Request, res: Response) => {
     success: true,
     message: "user logged out successfully",
   });
+};
+
+export const forgotPasswordHandler = async (
+  req: Request<{}, {}, ForgotPasswordInput>,
+  res: Response,
+) => {
+  await forgotPasswordService(req.body);
+
+  res.status(StatusCodes.OK).json({ success: true, message: "Check your email for reset link." });
+};
+
+export const resetPasswordHandler = async (
+  req: Request<{}, {}, ResetPasswordInput["body"], ResetPasswordInput["query"]>,
+  res: Response,
+) => {
+  await resetPasswordService({ password: req.body.newPassword, token: req.query.token });
+
+  res.status(StatusCodes.OK).json({ success: true, message: "Password reset successful" });
 };

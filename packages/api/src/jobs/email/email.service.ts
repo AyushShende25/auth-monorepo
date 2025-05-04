@@ -1,7 +1,11 @@
 import nodemailer from "nodemailer";
 
 import { env } from "@/config/env";
-import { getVerificationTemplate, getWelcomeTemplate } from "@/jobs/email/emailTemplates";
+import {
+  getResetTemplate,
+  getVerificationTemplate,
+  getWelcomeTemplate,
+} from "@/jobs/email/emailTemplates";
 
 class Email {
   private to: string;
@@ -44,6 +48,11 @@ class Email {
   async sendWelcome() {
     const html = getWelcomeTemplate(this.firstname);
     await this.send(html, "Welcome to Organization-Name!");
+  }
+
+  async sendResetToken(resetLink: string) {
+    const html = getResetTemplate(resetLink);
+    await this.send(html, "Reset your password");
   }
 }
 

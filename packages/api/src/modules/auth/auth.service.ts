@@ -4,19 +4,26 @@ import jwt from "jsonwebtoken";
 import { env } from "@/config/env";
 import { BadRequestError, ServiceUnavailableError, UnAuthorizedError } from "@/errors";
 import { addEmailToQueue } from "@/jobs/email/email.queue";
-import { createUser, verifyUser } from "@/modules/auth/auth.dal";
+import { createUser, updatePassword, verifyUser } from "@/modules/auth/auth.dal";
 import type { RefreshTokenPayload } from "@/modules/auth/auth.types";
 import {
   comparePassword,
+  generatePasswordResetToken,
   generateTokens,
   generateVerificationCode,
   hashPassword,
 } from "@/modules/auth/auth.utils";
 import { getUserByEmail, getUserById } from "@/modules/users/users.dal";
 import * as refreshTokenIdStorage from "@/redis/refreshTokenIdStorage";
+import * as resetTokenStorage from "@/redis/resetTokenStorage";
 import * as verificationCodeStorage from "@/redis/verificationCodeStorage";
 import Logger from "@/utils/logger";
-import type { LoginInput, SignupInput, VerifyEmailInput } from "@auth-monorepo/shared/schema/auth";
+import type {
+  ForgotPasswordInput,
+  LoginInput,
+  SignupInput,
+  VerifyEmailInput,
+} from "@auth-monorepo/shared/schema/auth";
 
 export const signupService = async (signupInput: SignupInput) => {
   // Check if user already exists
@@ -125,5 +132,55 @@ export const refreshTokensService = async (req: Request) => {
 };
 
 export const logoutService = async (userId: string) => {
+  await refreshTokenIdStorage.invalidate(userId);
+};
+
+export const forgotPasswordService = async (forgotPasswordInput: ForgotPasswordInput) => {
+  // get user email from client
+  // check if the user exists
+  const existingUser = await getUserByEmail(forgotPasswordInput.email);
+  if (!existingUser) {
+    return;
+  }
+
+  // generate and store reset token
+  const token = generatePasswordResetToken();
+  await resetTokenStorage.setResetToken(existingUser.id, token);
+
+  // generate reset link
+  const resetLink = `${env.CLIENT_URL}/reset-password?token=${token}`;
+
+  // send a reset password email
+  try {
+    await addEmailToQueue("reset", {
+      email: existingUser.email,
+      firstname: existingUser.firstName,
+      resetLink,
+    });
+  } catch (err) {
+    Logger.error("Failed to queue verification email", err);
+    throw new ServiceUnavailableError("Email service is down");
+  }
+};
+
+export const resetPasswordService = async ({
+  password,
+  token,
+}: { password: string; token: string }) => {
+  // get new password and reset token from client
+  // verify the reset password token
+  const userId = await resetTokenStorage.getResetToken(token);
+  if (!userId) throw new BadRequestError("Invalid or expired token");
+
+  // hash the password
+  const hashedPassword = await hashPassword(password);
+
+  // update the user data with new password
+  await updatePassword({ userId, newPassword: hashedPassword });
+
+  // delete reset token from redis
+  await resetTokenStorage.deleteResetToken(token);
+
+  // invalidate any old refresh-tokens before password reset
   await refreshTokenIdStorage.invalidate(userId);
 };

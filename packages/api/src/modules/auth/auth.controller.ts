@@ -1,7 +1,13 @@
 import type { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-import { loginService, signupService, verifyEmailService } from "@/modules/auth/auth.service";
+import {
+  loginService,
+  logoutService,
+  refreshTokensService,
+  signupService,
+  verifyEmailService,
+} from "@/modules/auth/auth.service";
 import { cookieOptions } from "@/modules/auth/auth.utils";
 import type { LoginInput, SignupInput, VerifyEmailInput } from "@auth-monorepo/shared/schema/auth";
 
@@ -34,4 +40,31 @@ export const loginHandler = async (req: Request<{}, {}, LoginInput>, res: Respon
   });
 
   res.status(200).json({ success: true, message: "User login success" });
+};
+
+export const refreshTokensHandler = async (req: Request, res: Response) => {
+  const { access_token, refresh_token } = await refreshTokensService(req);
+
+  res.cookie("access_token", access_token, {
+    ...cookieOptions,
+    expires: new Date(Date.now() + 1000 * 60 * 1),
+  });
+  res.cookie("refresh_token", refresh_token, {
+    ...cookieOptions,
+    expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+  });
+
+  res.status(StatusCodes.OK).json({ success: true, message: "new tokens generation successfull" });
+};
+
+export const logoutHandler = async (req: Request, res: Response) => {
+  await logoutService(req.userId as string);
+
+  res.clearCookie("access_token", { ...cookieOptions, expires: new Date(0) });
+  res.clearCookie("refresh_token", { ...cookieOptions, expires: new Date(0) });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: "user logged out successfully",
+  });
 };

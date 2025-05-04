@@ -1,13 +1,19 @@
+import type { Request } from "express";
+import jwt from "jsonwebtoken";
+
+import { env } from "@/config/env";
 import { BadRequestError, ServiceUnavailableError, UnAuthorizedError } from "@/errors";
 import { addEmailToQueue } from "@/jobs/email/email.queue";
 import { createUser, verifyUser } from "@/modules/auth/auth.dal";
+import type { RefreshTokenPayload } from "@/modules/auth/auth.types";
 import {
   comparePassword,
   generateTokens,
   generateVerificationCode,
   hashPassword,
 } from "@/modules/auth/auth.utils";
-import { getUserByEmail } from "@/modules/users/users.dal";
+import { getUserByEmail, getUserById } from "@/modules/users/users.dal";
+import * as refreshTokenIdStorage from "@/redis/refreshTokenIdStorage";
 import * as verificationCodeStorage from "@/redis/verificationCodeStorage";
 import Logger from "@/utils/logger";
 import type { LoginInput, SignupInput, VerifyEmailInput } from "@auth-monorepo/shared/schema/auth";
@@ -91,4 +97,33 @@ export const loginService = async (loginInput: LoginInput) => {
   const { password, ...safeUser } = existingUser;
   const { access_token, refresh_token } = await generateTokens(safeUser);
   return { access_token, refresh_token, user: safeUser };
+};
+
+export const refreshTokensService = async (req: Request) => {
+  const refreshToken: string = req.cookies.refresh_token;
+  if (!refreshToken) {
+    throw new UnAuthorizedError();
+  }
+  try {
+    const { refreshTokenId, sub } = jwt.verify(refreshToken, env.JWT_SECRET) as RefreshTokenPayload;
+
+    const user = await getUserById(sub);
+    if (!user) {
+      throw new UnAuthorizedError("User does not exist");
+    }
+
+    const isValid = await refreshTokenIdStorage.validate(user.id, refreshTokenId);
+    if (isValid) {
+      await refreshTokenIdStorage.invalidate(user.id);
+    } else {
+      throw new UnAuthorizedError("Invalid token");
+    }
+    return await generateTokens(user);
+  } catch (error) {
+    throw new UnAuthorizedError("Invalid token: Access Denied");
+  }
+};
+
+export const logoutService = async (userId: string) => {
+  await refreshTokenIdStorage.invalidate(userId);
 };

@@ -6,11 +6,13 @@ export const signupSchema = z.object({
       .string({
         required_error: "first name is required",
       })
+      .min(1, "name cannot be empty")
       .trim(),
     lastName: z
       .string({
         required_error: "last name is required",
       })
+      .min(1, "name cannot be empty")
       .trim(),
     email: z
       .string({
@@ -50,6 +52,7 @@ export const loginSchema = z.object({
       .string({
         required_error: "Password is required",
       })
+      .min(1, "password cannot be empty")
       .trim(),
   }),
 });
@@ -76,9 +79,11 @@ export const resetPasswordSchema = z.object({
         .max(32, "Password must be less than 32 characters")
         .trim(),
 
-      confirmPassword: z.string({
-        required_error: "confirm Password is required",
-      }),
+      confirmPassword: z
+        .string({
+          required_error: "confirm Password is required",
+        })
+        .min(1, "password cannot be empty"),
     })
     .refine((val) => val.newPassword === val.confirmPassword, {
       message: "passwords do not match",

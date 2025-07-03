@@ -5,5 +5,9 @@ export const Route = createFileRoute("/")({
 });
 
 function App() {
-  return <div className="">home</div>;
+  return (
+    <div>
+      <h1 className="text-3xl font-bold text-center mt-20">This route is accessible for public</h1>
+    </div>
+  );
 }

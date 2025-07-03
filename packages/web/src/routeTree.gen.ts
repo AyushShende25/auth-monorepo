@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as VerifyEmailImport } from './routes/verify-email'
+import { Route as UnauthorizedImport } from './routes/unauthorized'
 import { Route as SignupImport } from './routes/signup'
 import { Route as ProtectedImport } from './routes/protected'
 import { Route as LoginImport } from './routes/login'
@@ -23,6 +24,12 @@ import { Route as IndexImport } from './routes/index'
 const VerifyEmailRoute = VerifyEmailImport.update({
   id: '/verify-email',
   path: '/verify-email',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const UnauthorizedRoute = UnauthorizedImport.update({
+  id: '/unauthorized',
+  path: '/unauthorized',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -95,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupImport
       parentRoute: typeof rootRoute
     }
+    '/unauthorized': {
+      id: '/unauthorized'
+      path: '/unauthorized'
+      fullPath: '/unauthorized'
+      preLoaderRoute: typeof UnauthorizedImport
+      parentRoute: typeof rootRoute
+    }
     '/verify-email': {
       id: '/verify-email'
       path: '/verify-email'
@@ -113,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/protected': typeof ProtectedRoute
   '/signup': typeof SignupRoute
+  '/unauthorized': typeof UnauthorizedRoute
   '/verify-email': typeof VerifyEmailRoute
 }
 
@@ -122,6 +137,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/protected': typeof ProtectedRoute
   '/signup': typeof SignupRoute
+  '/unauthorized': typeof UnauthorizedRoute
   '/verify-email': typeof VerifyEmailRoute
 }
 
@@ -132,6 +148,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/protected': typeof ProtectedRoute
   '/signup': typeof SignupRoute
+  '/unauthorized': typeof UnauthorizedRoute
   '/verify-email': typeof VerifyEmailRoute
 }
 
@@ -143,9 +160,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/protected'
     | '/signup'
+    | '/unauthorized'
     | '/verify-email'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/login' | '/protected' | '/signup' | '/verify-email'
+  to:
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/protected'
+    | '/signup'
+    | '/unauthorized'
+    | '/verify-email'
   id:
     | '__root__'
     | '/'
@@ -153,6 +178,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/protected'
     | '/signup'
+    | '/unauthorized'
     | '/verify-email'
   fileRoutesById: FileRoutesById
 }
@@ -163,6 +189,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ProtectedRoute: typeof ProtectedRoute
   SignupRoute: typeof SignupRoute
+  UnauthorizedRoute: typeof UnauthorizedRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
 }
 
@@ -172,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ProtectedRoute: ProtectedRoute,
   SignupRoute: SignupRoute,
+  UnauthorizedRoute: UnauthorizedRoute,
   VerifyEmailRoute: VerifyEmailRoute,
 }
 
@@ -190,6 +218,7 @@ export const routeTree = rootRoute
         "/login",
         "/protected",
         "/signup",
+        "/unauthorized",
         "/verify-email"
       ]
     },
@@ -207,6 +236,9 @@ export const routeTree = rootRoute
     },
     "/signup": {
       "filePath": "signup.tsx"
+    },
+    "/unauthorized": {
+      "filePath": "unauthorized.tsx"
     },
     "/verify-email": {
       "filePath": "verify-email.tsx"

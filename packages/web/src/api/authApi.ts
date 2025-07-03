@@ -1,4 +1,5 @@
 import { api } from "@/api/axiosInstance";
+import type { User } from "@/constants/types";
 import type { LoginInput, SignupInput, VerifyEmailInput } from "@auth-monorepo/shared/schema/auth";
 import { queryOptions } from "@tanstack/react-query";
 
@@ -15,7 +16,7 @@ export const authApi = {
     const res = await api.post("/auth/verify-email", data);
     return res.data;
   },
-  getMe: async () => {
+  getMe: async (): Promise<User | null> => {
     try {
       const res = await api.get("/users/me");
       return res.data.data;
